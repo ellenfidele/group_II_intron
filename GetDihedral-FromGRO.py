@@ -1,19 +1,30 @@
+#!/usr/bin/env python
+# coding: utf-8
+
 import numpy as np
 import math
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import re
 import json
-# import cPickle as pickle
-# get_ipython().magic('matplotlib inline')
+import argparse
 
-iso_fn = "./D1_iso.adjusted.gro"
-full_fn = "./D1_full.adjusted.gro"
-#out_fn = "hellinger.dat"
+
+
+parser = argparse.ArgumentParser(description='calculate the theta and eta pseududihedral angels for group II intron (both iso and full)')
+parser.add_argument('--iso_input', type=str, help='input trajectory of group II intron D1 iso ')
+parser.add_argument('--full_input', type=str, help='input trajetory of group II intron D1 from full structure')
+args = parser.parse_args()
+#args = parser.parse_args(['--iso_input=iso_adjusted.gro', '--full_input=full_adjusted.gro'])
+
+iso_fn = args.iso_input
+full_fn = args.full_input
+
 
 def separate_string(s):
     m = re.search('^[\+\-]?[0-9]+', s)
     if m:
         return(s[m.start():m.end()])
+
 
 def get_coords(frame, P_list, C4_list):
         for line in frame:
@@ -27,6 +38,7 @@ def get_coords(frame, P_list, C4_list):
             elif atomname == "C4*":
                 C4_list.append([resid, coords])
 #         return P_list, C4_list
+
 
 def dihedral(P_0, P_1, P_2, P_3):
     p0 = np.array([float(P_0[0]), float(P_0[1]), float(P_0[2])]);
@@ -53,6 +65,7 @@ def dihedral(P_0, P_1, P_2, P_3):
     else:
         return dih
 
+
 def theta(dic_C4, dic_P, theta_dic):
     for i in dic_P:
         if ((int(i)-1) in dic_C4 and i in dic_C4 and (int(i)+1) in dic_P):
@@ -67,6 +80,7 @@ def eta(dic_C4, dic_P, eta_dic):
             eta_dic.setdefault(i, []).append(dihedral(dic_P[i], dic_C4[i], dic_P[int(i)+1], dic_C4[int(i)+1]));
         else:
             continue
+
 
 def delta_sq(iso, full):
     delta_sq_dic = {}
@@ -83,6 +97,7 @@ def delta_sq(iso, full):
         delta_sq_dic[i] = delta_2
     return delta_sq_dic
 
+
 def analyze_frame(frame, theta_val, eta_val):
     input_P = []
     input_C4 = []
@@ -97,6 +112,7 @@ def analyze_frame(frame, theta_val, eta_val):
     theta(input_C4_dic, input_P_dic, theta_val)
     eta(input_C4_dic, input_P_dic, eta_val)
 
+
 def read_frame(filename, theta_out, eta_out):
     with open(filename, 'r') as file_in:
         in_frame = False
@@ -104,8 +120,8 @@ def read_frame(filename, theta_out, eta_out):
         
         for line in file_in:
             entries = line.strip().split()
-            #if num_frame > 10000:
-            #    break
+            if num_frame > 10000:
+                break
             if entries[0] == "Generated":
                 frame = []
                 theta_frame = {}
@@ -121,9 +137,11 @@ def read_frame(filename, theta_out, eta_out):
     return theta_out
     return eta_out
 
+
 def wrtie_dic_to_file(dic, filenm):
     with open(filenm, 'w') as fo:
         fo.write(json.dumps(dic))
+
 
 iso_theta_out = {}
 iso_eta_out = {}
@@ -143,4 +161,7 @@ for i in ['iso', 'full']:
         fn = "./%s_%s.txt" %(i, j)
         dic = '%s_%s' %(i, j)
         wrtie_dic_to_file(dic_name[dic], fn)
+
+
+
 

@@ -12,6 +12,7 @@ parser.add_argument('--iso_output', type=str, help='output file name of group II
 parser.add_argument('--full_input', type=str, help='input file name of group II intron D1 from full structure')
 parser.add_argument('--full_output', type=str, help='output file name of group II intron D1 from full structure')
 args = parser.parse_args()
+#args = parser.parse_args(['--iso_input=D1_iso_noIon.part20.gro','--iso_output=iso_adjusted.gro', '--full_input=D1_isofromfull_noIon.part17.gro', '--full_output=full_adjusted.gro'])
 
 
 def separate_string(s):
@@ -52,7 +53,7 @@ with open(iso_in, 'r') as fin:
         elif entries[0] == "Generated":
             fot.write(line)
             frame +=1;
-            if frame % 1000 == 0:
+            if frame % 100 == 0:
                 print('%d' %frame)
         else:
             fot.write(line)
@@ -72,8 +73,8 @@ with open(full_in, 'r') as f_in:
         elif entries[0] == "Generated":
             f_out.write(line)
             frame_full +=1;
-            if frame_full % 1000 == 0:
-                print('%d' &frame_full)
+            if frame_full % 100 == 0:
+                print('%d' %frame_full)
         else:
             f_out.write(line)
 

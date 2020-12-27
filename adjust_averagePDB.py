@@ -5,12 +5,13 @@ import numpy as np
 import argparse
 
 
-parser = argparse.ArgumentParser(description='Adjust residue indices in PDB files of group II intron (both iso and full)')
+parser = argparse.ArgumentParser(description='Adjust residue indices in PDB files of average structures of group II intron (both iso and full)')
 parser.add_argument('--iso_input', type=str, help='input file name of group II intron D1 iso')
 parser.add_argument('--iso_output', type=str, help='output file name of group II intron D1 iso')
 parser.add_argument('--full_input', type=str, help='input file name of group II intron D1 from full structure')
 parser.add_argument('--full_output', type=str, help='output file name of group II intron D1 from full structure')
 args = parser.parse_args()
+#args = parser.parse_args(['--iso_input=average.D1_iso.no_Ion.pdb','--iso_output=average.iso_adjusted.pdb', '--full_input=average.D1_isofromfull.no_Ion.pdb', '--full_output=average.full_adjusted.gro'])
 
 
 iso_in = args.iso_input
@@ -26,9 +27,12 @@ with open(iso_in, 'r') as fin:
     resid = 0;
     
     for line in fin:
+        if not line.startswith('ATOM'):
+            continue
         entries = line.strip().split()
 
-#             print(line)
+#         print(line)
+        
         resid = int(entries[4])
         if resid < 5:
             fot.write(line.replace("   %d   " %resid, "   %d   " %(resid+s[0])))
@@ -49,6 +53,9 @@ with open(full_in, 'r') as f_in:
     resid = 0;
     
     for line in f_in:
+        if not line.startswith('ATOM'):
+            continue
+            
         entries = line.strip().split()
         resid = int(entries[4])
         f_out.write(line.replace("   %d   " %resid, "   %d   " %(resid-5)))
